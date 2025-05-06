@@ -1,0 +1,103 @@
+import java.rmi.*;
+
+interface ServerIntf extends Remote{
+
+    double addition(double a, double b) throws RemoteException;
+    double subtraction(double a, double b) throws RemoteException;
+    double multiplication(double a, double b) throws RemoteException;
+    double division(double a, double b) throws RemoteException;
+    String concatenate(String str1, String str2) throws RemoteException;
+}
+
+
+import java.rmi.*;
+import java.rmi.server.*;
+
+public class ServerImpl extends UnicastRemoteObject implements ServerIntf {
+
+    ServerImpl() throws RemoteException{}
+
+    @Override
+    public double addition(double a, double b) throws RemoteException {
+        return a + b;
+    }
+
+    public double subtraction( double a, double b) throws RemoteException{
+        return a - b;
+    }
+
+    public double multiplication(double a, double b) throws RemoteException{
+        return a * b;
+    }
+
+    public double division(double a, double b){
+        if (b == 0) {
+            throw new ArithmeticException("Cannot divide by zero.");
+        }
+        return a / b;
+    }
+
+    public String concatenate(String str1, String str2) throws RemoteException {
+        return str1 + str2;
+    }
+}
+
+
+import java.rmi.Naming;
+
+public class Server {
+    public static void main(String[] args){
+        try{
+            ServerImpl Server = new ServerImpl();
+            Naming.rebind("Server",Server);
+            System.out.println("Server Started!!!");
+        }catch(Exception e){
+            System.err.println("Server exception: " + e.toString());
+        }
+    }
+}
+
+
+import java.rmi.*;
+import java.util.Scanner;
+
+public class Client {
+
+    public static void main(String[] args){
+
+        Scanner sc = new Scanner(System.in);
+
+        try {
+            String serverUrl = "rmi://localhost/Server";
+            ServerIntf Server = (ServerIntf) Naming.lookup(serverUrl);
+
+            System.out.println("Enter 1st number");
+            double num1 = sc.nextDouble();
+
+            System.out.println("Enter 2nd number");
+            double num2 = sc.nextDouble();
+
+            System.out.println("Addition: " + Server.addition(num1, num2));
+            System.out.println("Subtraction: " + Server.subtraction(num1, num2));
+            System.out.println("Multiplication: " + Server.multiplication(num1, num2));
+            System.out.println("Division: " + Server.division(num1, num2));
+
+            sc.nextLine(); // clear buffer
+
+            System.out.print("Enter first string: ");
+            String str1 = sc.nextLine();
+
+            System.out.print("Enter second string: ");
+            String str2 = sc.nextLine();
+
+            System.out.println("Concatenated string: " + Server.concatenate(str1, str2));
+
+        }catch(Exception e){
+            System.err.println("Client exception: " + e.toString());
+//            e.printStackTrace();
+        }
+    }
+
+}
+
+
