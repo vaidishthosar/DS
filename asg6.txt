@@ -1,0 +1,131 @@
+import java.util.*;
+
+class Process{
+    int id;
+    boolean isActive;
+
+    public Process(int id){
+        this.id = id;
+        this.isActive = true;
+    }
+    public void deactivate(){
+        isActive = false;
+    }
+}
+
+public class BullyAlgorithm{
+
+    static List<Process> processes = new ArrayList<>();
+    static int coordinator = -1;
+
+    public static void startElection(int initiator){
+        boolean highFound = false;
+        System.out.println("Process "+initiator+" starts election");
+
+        for(Process p: processes){
+            if(p.id > initiator){
+                if(p.isActive){
+                    System.out.println("Sent election message to process "+p.id);
+                    System.out.println("Found active process "+p.id+" higher than "+initiator);
+                    highFound = true;
+                    startElection(p.id);
+                    break;
+                }else{
+                    System.out.println("Found process "+p.id+" is higher than "+initiator+" but it is inactive!");
+                }
+            }
+        }
+
+        if(!highFound){
+            System.out.println("No higher process is found \n New coordinator is process: "+initiator);
+            coordinator = initiator;
+        }
+    }
+
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+
+        int n;
+        int initiator;
+        int failed;
+
+        System.out.print("Enter number of processes: ");
+        n = sc.nextInt();
+        System.out.print("Enter failed process: ");
+        failed = sc.nextInt();
+        System.out.print("Enter the process which detects the failure: ");
+        initiator = sc.nextInt();
+
+        for (int i = 0; i < n; i++){
+            processes.add(new Process(i));
+        }
+
+        processes.get(failed).deactivate();
+        startElection(initiator);
+
+        System.out.println("Coordinator is found after election \n Final coordinator is :"+coordinator);
+    }
+
+
+
+
+import java.util.*;
+
+class Processes{
+    int id;
+    boolean isActive;
+
+    Processes(int id){
+        this.id = id;
+        this.isActive = true;
+    }
+
+    void deactivate(){
+        isActive = false;
+    }
+}
+
+public class RingAlgorithm {
+    static List<Processes> processesList = new ArrayList<>();
+    static int coordinator = -1;
+
+    static void startElection(int initiator){
+        System.out.println("Process "+ initiator+" has started election!!!");
+        List<Integer> activeIds = new ArrayList<>();
+        int current = initiator;
+        do{
+            if( processesList.get(current).isActive){
+                activeIds.add(current);
+                System.out.println("Election message passed to process: "+current);
+            }
+            current = (current +1)%processesList.size();
+        }while(current != initiator);
+
+        coordinator = Collections.max(activeIds);
+        System.out.println("New coordinator is :"+ coordinator);
+
+    }
+
+    public static void main(String[] args){
+        int n, failed, initiator;
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter number of processes: ");
+        n = sc.nextInt();
+
+        for(int i = 0; i < n; i++){
+            processesList.add(new Processes(i));
+        }
+
+        System.out.println("Enter process that fails");
+        failed = sc.nextInt();
+
+        System.out.println("Enter process which starts election: ");
+        initiator = sc.nextInt();
+
+        processesList.get(failed).deactivate();
+
+        startElection(initiator);
+
+
+    }
+}
