@@ -1,0 +1,53 @@
+import java.util.*;
+
+public class Lab5 {
+    public static void main(String[] args){
+
+        Scanner sc = new Scanner(System.in);
+        int nodes;
+
+        System.out.print("Enter Number of nodes: ");
+        nodes = sc.nextInt();
+
+        System.out.println("The ring formed is: ");
+        for(int i=0; i < nodes; i++ ){
+            System.out.print(i + "-> ");
+        }
+        System.out.println("0");
+
+        String token = "";
+        int sender ;
+        int receiver;
+
+        int choice  = 1;
+        do{
+
+            sc.nextLine();
+            System.out.print("Enter data to send :");
+            token = sc.nextLine();
+
+            System.out.print("Enter sender: ");
+            sender = sc.nextInt();
+
+            System.out.print("Enter receiver :");
+            receiver = sc.nextInt();
+            
+            System.out.println("Token passing :");
+            for (int i = 0; i <= sender; i++){
+                System.out.print(i+ "-> ");
+            }
+
+            System.out.println("---> Sender "+ sender +"is sending data :- "+ token);
+            for(int i = sender+1; i != receiver; i = (i+1)%nodes){
+                System.out.println("Data "+ token+" forwarded by node "+ i);
+            }
+
+            System.out.println("---> Receiver " + receiver +" received the data "+ token);
+            System.out.println("Do you want to continue ?");
+            System.out.println("1: Yes");
+            System.out.println("2: No");
+            System.out.println("Enter choice: ");
+            choice = sc.nextInt();
+        }while(choice ==1);
+    }
+}
