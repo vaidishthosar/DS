@@ -1,0 +1,78 @@
+
+import java.util.*;
+
+class Machine {
+    private String name;
+    private int clockTime; // system time is in seconds
+
+    public Machine(String name, int clockTime) {
+        this.name = name;
+        this.clockTime = clockTime;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getClockTime() {
+        return clockTime;
+    }
+
+    public void adjustClock(int offset) {
+        clockTime += offset;
+    }
+
+    public int calculateOffset(int masterTime) {
+        return clockTime - masterTime;
+    }
+}
+
+public class BerkeleyAlgorithm {
+    public static void main(String[] args) {
+        // Master clock time (in seconds)
+        int masterClock = 10000;
+
+        // List of slave machines with slightly different times
+        List<Machine> machines = new ArrayList<>();
+        machines.add(new Machine("Machine A", 9990));
+        machines.add(new Machine("Machine B", 10010));
+        machines.add(new Machine("Machine C", 10030));
+        machines.add(new Machine("Machine D", 9980));
+
+        // Master gathers all the offsets
+        List<Integer> offsets = new ArrayList<>();
+        System.out.println("Initial clock times:");
+        for (Machine m : machines) {
+            System.out.println(m.getName() + ": " + m.getClockTime());
+            int offset = m.calculateOffset(masterClock);
+            offsets.add(offset);
+        }
+
+        // Master offset is 0 (but we include it in average)
+        offsets.add(0); // Including master's own time in average
+
+        // Compute average offset
+        int totalOffset = 0;
+        for (int offset : offsets) {
+            totalOffset += offset;
+        }
+        int avgOffset = totalOffset / offsets.size();
+
+        // Adjust all clocks including master's
+        System.out.println("\nAdjusting clocks...");
+        masterClock += avgOffset;
+        System.out.println("Master Clock adjusted to: " + masterClock);
+
+        for (Machine m : machines) {
+            int offset = m.calculateOffset(masterClock);
+            m.adjustClock(-offset); // bring it in sync with new master time
+        }
+
+        // Final result
+        System.out.println("\nSynchronized clock times:");
+        System.out.println("Master: " + masterClock);
+        for (Machine m : machines) {
+            System.out.println(m.getName() + ": " + m.getClockTime());
+        }
+    }
+}
