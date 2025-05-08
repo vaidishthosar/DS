@@ -1,0 +1,130 @@
+Calculator.idl
+
+module CalculatorApp {
+  interface Calculator {
+    float add(in float a, in float b);
+    float subtract(in float a, in float b);
+    float multiply(in float a, in float b);
+    float divide(in float a, in float b);
+    string concat(in string a, in string b); // New operation
+  };
+};
+
+idlj -fall Calculator.idl
+tnameserv -ORBInitialPort 1050 or orbd -ORBInitialPort 1050
+
+CalculatorImpl.java
+
+import CalculatorApp.*;
+import org.omg.CORBA.*;
+
+public class CalculatorImpl extends CalculatorPOA {
+  private ORB orb;
+
+  public void setORB(ORB orb_val) {
+    orb = orb_val;
+  }
+
+  public float add(float a, float b) {
+    return a + b;
+  }
+
+  public float subtract(float a, float b) {
+    return a - b;
+  }
+
+  public float multiply(float a, float b) {
+    return a * b;
+  }
+
+  public float divide(float a, float b) {
+    return b != 0 ? a / b : 0;
+  }
+
+  public String concat(String a, String b) {
+    return a + b;
+  }
+}
+
+
+CalculatorServer.java
+
+import CalculatorApp.*;
+import org.omg.CORBA.*;
+import org.omg.PortableServer.*;
+import org.omg.PortableServer.POA;
+
+import java.util.Properties;
+
+public class CalculatorServer {
+  public static void main(String[] args) {
+    try {
+      ORB orb = ORB.init(args, null);
+
+      POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+      rootpoa.the_POAManager().activate();
+
+      CalculatorImpl calcImpl = new CalculatorImpl();
+      calcImpl.setORB(orb);
+
+      org.omg.CORBA.Object ref = rootpoa.servant_to_reference(calcImpl);
+      Calculator href = CalculatorHelper.narrow(ref);
+
+      org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
+      NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+
+      NameComponent path[] = ncRef.to_name("Calculator");
+      ncRef.rebind(path, href);
+
+      System.out.println("CalculatorServer ready and waiting...");
+      orb.run();
+    } catch (Exception e) {
+      System.err.println("ERROR: " + e);
+      e.printStackTrace(System.out);
+    }
+    System.out.println("CalculatorServer Exiting...");
+  }
+}
+
+
+CalculatorClient.java
+
+import CalculatorApp.*;
+import org.omg.CORBA.*;
+import org.omg.CosNaming.*;
+import org.omg.CosNaming.NamingContextPackage.*;
+
+public class CalculatorClient {
+  public static void main(String[] args) {
+    try {
+      ORB orb = ORB.init(args, null);
+
+      org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
+      NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
+
+      Calculator calcRef = CalculatorHelper.narrow(ncRef.resolve_str("Calculator"));
+
+      float a = 10, b = 2;
+      String str1 = "Hello, ", str2 = "CORBA!";
+
+      System.out.println("Addition: " + calcRef.add(a, b));
+      System.out.println("Subtraction: " + calcRef.subtract(a, b));
+      System.out.println("Multiplication: " + calcRef.multiply(a, b));
+      System.out.println("Division: " + calcRef.divide(a, b));
+      System.out.println("Concatenation: " + calcRef.concat(str1, str2)); // New line
+
+    } catch (Exception e) {
+      System.out.println("ERROR: " + e);
+      e.printStackTrace(System.out);
+    }
+  }
+}
+
+
+javac *.java CalculatorApp/*.java
+java CalculatorServer -ORBInitialPort 1050 -ORBInitialHost localhost
+java CalculatorClient -ORBInitialPort 1050 -ORBInitialHost localhost
+
+
+
+
