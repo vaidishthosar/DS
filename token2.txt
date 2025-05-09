@@ -1,0 +1,50 @@
+import java.util.Scanner;
+
+public class token
+{
+	public static void main(String[] args)
+	{
+		Scanner sc= new Scanner(System.in);
+		
+		System.out.println("enter msg=");
+		String message = sc.nextLine();
+		
+		System.out.println("enter no. of process=");
+		int n = sc.nextInt();
+		
+		System.out.println("processes are=");
+		for(int i=1;i<=n;i++)
+		{
+			System.out.println(i+" ");
+		}
+		System.out.println("1\n");
+		
+		System.out.println("enter sender=");
+		int sender = sc.nextInt();
+		
+		System.out.println("enter receiver=");
+		int receiver = sc.nextInt();
+		
+		
+		for(int i=1;i<=n;i++)
+		{
+			if(i==sender)
+			{
+				System.out.println("senderprocess="+ sender);
+				System.out.println("\ntoken is received by sender");
+				System.out.println("msg to b send="+ message);
+				break;			
+			}
+		}
+		
+		for(int i= sender+1; i != receiver; i=(i%n)+1)
+		{
+			System.out.println("\ntoken passed to process->"+i);
+		}
+		
+		System.out.println("receiver process="+ receiver);
+		System.out.println("the message received="+ message);
+		sc.close();
+	}
+	
+}
